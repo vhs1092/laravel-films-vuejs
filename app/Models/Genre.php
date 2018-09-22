@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Genre;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,7 +15,7 @@ class Genre extends Model
     */
     protected $primaryKey = 'id';
 
-    protected $fillable = ['name', 'status'];
+    protected $fillable = ['uuid', 'name', 'status'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
