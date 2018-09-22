@@ -13,11 +13,19 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::prefix('auth')->group(function () {
+    // Registration Routes...
+    Route::post('register', 'RegisterController@register');
+
+    // JWT Routes
+    Route::post('login', 'AuthController@login');
+    Route::post('logout', 'AuthController@logout');
+    Route::post('refresh', 'AuthController@refresh');
+    Route::post('me', 'AuthController@me');
 });
 
-Route::group(['middleware' => ['api'], 'namespace' => 'Api'], function () {
+
+Route::group(['middleware' => ['auth:api'], 'namespace' => 'Api'], function () {
     
 
     Route::get('/films/comments', 'FilmController@get_film_comments');
@@ -30,4 +38,5 @@ Route::group(['middleware' => ['api'], 'namespace' => 'Api'], function () {
     Route::resource('/comments', 'CommentController');
 
 });
+
 
