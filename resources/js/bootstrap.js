@@ -2,8 +2,15 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import axios from 'axios'
 import Navbar from './components/NavBar'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+import locale from 'element-ui/lib/locale/lang/en';
+import money from 'v-money';
 
-const BASE_URL = process.env.BASE_URL || 'http://laravel-codeline.com'
+Vue.use(money, { precision: 2 })
+Vue.use(ElementUI, { locale })
+
+const BASE_URL = process.env.MIX_APP_URL || 'http://localhost:8000'
 
 window.axios = axios
 

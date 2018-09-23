@@ -15,7 +15,7 @@ class Film extends Model
     */
     protected $primaryKey = 'id';
 
-    protected $fillable = ['name', 'slug', 'description', 'release_date', 'rating', 'ticket_price', 'country', 'photo', 'user_id'];
+    protected $fillable = ['uuid', 'name', 'slug', 'description', 'release_date', 'rating', 'ticket_price', 'country', 'photo', 'user_id'];
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo

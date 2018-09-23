@@ -31,6 +31,7 @@ Route::prefix('auth')->group(function () {
 Route::group(['middleware' => ['auth:api'], 'namespace' => 'Api'], function () {
     
 
+    Route::get('/films/get_data', 'FilmController@get_data');
     Route::get('/films/comments', 'FilmController@get_film_comments');
     Route::get('/films/genres', 'FilmController@get_genres');
     Route::resource('/films', 'FilmController');

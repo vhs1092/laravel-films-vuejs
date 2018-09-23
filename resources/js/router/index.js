@@ -2,7 +2,10 @@ import VueRouter from 'vue-router'
 import store from '../store'
 import Home from '../components/Dashboard.vue'
 import CreateFilm from '../components/films/form.vue'
+import ShowFilm from '../components/films/show.vue'
 import indexFilm from '../components/films/index.vue'
+import indexGenres from '../components/genres/index.vue'
+import createGenres from '../components/genres/form.vue'
 import Register from '../components/Register.vue'
 import Login from '../components/Login.vue'
 
@@ -27,8 +30,40 @@ const router = new VueRouter({
 		},
 		{
 			path: '/films/create',
-			name: 'Create Film',
+			name: 'create-film',
 			component: CreateFilm,
+			meta: {
+				auth: true
+			}
+		},
+		{
+			path: '/films/:slug',
+			name: 'show-film',
+			component: ShowFilm,
+			meta: {
+				auth: true
+			}
+		},
+		{
+			path: '/genres',
+			name: 'genres',
+			component: indexGenres,
+			meta: {
+				auth: true
+			}
+		},
+		{
+			path: '/genres/create',
+			name: 'create-genre',
+			component: createGenres,
+			meta: {
+				auth: true
+			}
+		},
+		{
+			path: '/genres/edit/:uuid',
+			name: 'edit-genre',
+			component: createGenres,
 			meta: {
 				auth: true
 			}

@@ -18,6 +18,15 @@ class Genre extends Model
     protected $fillable = ['uuid', 'name', 'status'];
 
     /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
+    /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function films()

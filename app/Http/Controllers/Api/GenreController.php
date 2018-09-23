@@ -30,30 +30,20 @@ class GenreController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    {
+    {   
         try {
             Log::info('- [Genre] Storing data...');
 
             //*validate fields
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'status' => 'required|numeric',
+                'status' => 'required|boolean',
             ]);
 
             if ($validator->fails()) {
@@ -81,23 +71,12 @@ class GenreController extends Controller
     {
         try {
             Log::info('- [Genre] show genre...');
-            $genre = Genre::where('id', $id)->first();
-            return response()->json(['code' => 200]);
+            $genre = Genre::where('uuid', $id)->first();
+            return response()->json(['genre' => $genre]);
         } catch (\Exception $e) {
             Log::error('[Genre] error ' . $e->getMessage());
             return response()->json(['code' => 403, 'message' => 'Something went wrong']);
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
     }
 
     /**
@@ -109,35 +88,25 @@ class GenreController extends Controller
      */
     public function update(Request $request, $id)
     {
+        
         try {
             Log::info('- [Genre] update genre...');
              //*validate fields
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'status' => 'required|numeric',
+                'status' => 'required|boolean',
             ]);
 
             if ($validator->fails()) {
                 //!Validator fails
                 return response()->json(['code' => 400, 'message' => $validator->errors()]);
             }
-            $genre = Genre::where('uuid', $uuid)->first();
+            $genre = Genre::where('uuid', $id)->first();
             $genre->update($request->all());
-            return response()->json(['code' => 200]);
+            return response()->json(['code' => 200, 'message' => 'successfully updated!']);
         } catch (\Exception $e) {
             Log::error('[Genre] error ' . $e->getMessage());
             return response()->json(['code' => 403, 'message' => 'Something went wrong']);
         }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

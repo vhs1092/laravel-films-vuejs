@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use App\Models\Comment;
 use Webpatser\Uuid\Uuid;
 use App\Http\Controllers\Controller;
+use Validator;
+use Illuminate\Http\File;
 
 class FilmController extends Controller
 {
@@ -24,10 +26,13 @@ class FilmController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {  
+    {
         try {
             Log::info('- [Film] Listing data...');
-            $films = Film::all();
+            $films = Film::with('user')->get();
+            foreach ($films as $key => &$value) {
+                $value->storage_path = \Storage::disk('local')->url('images/'.$value->photo);
+            }
             return response()->json(['films' => $films, 'code' => 200]);
         } catch (\Exception $e) {
             Log::error('[Film] error ' . $e->getMessage());
@@ -58,7 +63,7 @@ class FilmController extends Controller
 
             Log::info('- [Film] saving film...');
 
-             //*validate fields
+            //*validate fields
             $validator = Validator::make($request->all(), [
                 'name' => 'required',
                 'description' => 'required',
@@ -67,7 +72,7 @@ class FilmController extends Controller
                 'ticket_price' => 'required|numeric',
                 'genres' => 'required',
                 'country' => 'required',
-                'photo' => 'required|mimes:jpeg,jpg,png,gif|max:10240'
+                'photo' => 'required'
             ]);
 
             if ($validator->fails()) {
@@ -82,22 +87,20 @@ class FilmController extends Controller
         
             $film_data['user_id'] = $this->user->id;
             $film_data['uuid'] = Uuid::generate(4)->string;
+            $film_data['release_date'] = Carbon::parse($film_data['release_date'])->format('Y-m-d');
 
             if (isset($request->photo)) {
                 //get photo
                 $upload_file = $request->file('photo');
-                $extension = $upload_file->getClientOriginalExtension();
-                $imageName = Carbon::now()->timestamp . '_' . $upload_file->getFilename().'.'.$extension;
-                //* save image in public storage
-                Storage::disk('public')->put($imageName, File::get($cover));
-
+                $upload_image = $this->uploadPhoto($request);
+                $imageName = $upload_image->filename;
                 $film_data['photo'] = $imageName;
             }
 
             //*get films
             $genres = [];
             if (isset($request->genres)) {
-                foreach ($film_genres as $film_genre) {
+                foreach ($request->genres as $film_genre) {
                     $genres[] = $film_genre;
                 }
             }
@@ -128,58 +131,22 @@ class FilmController extends Controller
         try {
             Log::info('- [Film] film '.$slug.' show');
             $film = Film::where('slug', $slug)->first();
-            return response()->json(['film' => $film]);
-        } catch (\Exception $e) {
-            Log::error('[Film] error ' . $e->getMessage());
-            return response()->json(['code' => 403, 'message' => 'Something went wrong']);
-        }
-    }
+            $film['genres'] = "";
+            if ($film->genres()->get()->count()) {
+                foreach ($film->genres()->get() as $genre) {
+                    $genres[] = $genre->name;
+                }
+                $film['genres'] =  $genres;
+            }
+            $film->storage_path = \Storage::disk('local')->url('images/'.$film->photo);
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+            //fetching the associated comments
+            $comments = [];
+            if ($film->comments()->get()->count()) {
+                $comments = $film->comments()->get();
+            }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
-
-    /**
-     * Get active genres
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function get_genres()
-    {
-        try {
-            Log::info('- [Film] get genres');
-            $genres = Genre::where('status', 1)->get();
-            return response()->json(['genres' => $genres]);
+            return response()->json(['info' => $film, 'comments' => $comments]);
         } catch (\Exception $e) {
             Log::error('[Film] error ' . $e->getMessage());
             return response()->json(['code' => 403, 'message' => 'Something went wrong']);
@@ -201,5 +168,63 @@ class FilmController extends Controller
             Log::error('[Genre] error ' . $e->getMessage());
             return response()->json(['code' => 403, 'message' => 'Something went wrong']);
         }
+    }
+
+    /**
+     * Get initial data to create film
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function get_data()
+    {
+        try {
+            Log::info('- [Genre] Get initial data...');
+            $genres = Genre::where('status', 1)->get();
+            $countries = config('countries.data');
+            return response()->json(['genres' => $genres, 'countries' => $countries]);
+        } catch (\Exception $e) {
+            Log::error('[Genre] error ' . $e->getMessage());
+            return response()->json(['code' => 403, 'message' => 'Something went wrong']);
+        }
+    }
+
+    /**
+     * Upload photo to storage
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function uploadPhoto($request)
+    {
+        $imageData = $request->get('photo');
+        $fileName = self::getName($imageData);
+        $img = \Image::make($imageData);
+        //$img->resize(100, 100);
+        $img->stream();
+        $path = 'images/' . $fileName;
+        $ret = [];
+        $upload = \Storage::disk('public')->put($path, $img->__toString(), 'public');
+        if (!$upload) {
+            $ret = ['error' => true, 'message' => 'File can not upload'];
+        } else {
+            $ret = ['error' => false, 'filename' => $fileName];
+        }
+
+        return (object)$ret;
+    }
+
+    /**
+     * Unique Photo name
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    public static function getName($inputField)
+    {
+        return Carbon::now()->timestamp . '_' .
+                uniqid() . '.' .
+                explode(
+                    '/',
+                    explode(':', substr($inputField, 0, strpos($inputField, ';')))[1]
+                )[1];
     }
 }
