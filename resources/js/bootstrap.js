@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import axios from 'axios'
 import Navbar from './components/NavBar'
 
-const BASE_URL = process.env.APP_URL || 'http://laravel-codeline.com'
+const BASE_URL = process.env.BASE_URL || 'http://laravel-codeline.com'
 
 window.axios = axios
 

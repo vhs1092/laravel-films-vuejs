@@ -25,10 +25,12 @@ class RegisterController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function register(RegisterRequest $request)
-    {   dd("x");
+    {   
+        $requestData = $request->all();
+        $requestData["password"] = bcrypt($request->password);
         return $this->respondWithToken(
             auth()->login(
-                User::create($request->validated())
+                User::create($requestData)
             )
         );
     }

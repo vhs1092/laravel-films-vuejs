@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
+
+
 Route::prefix('auth')->group(function () {
     // Registration Routes...
     Route::post('register', 'RegisterController@register');
@@ -23,6 +25,7 @@ Route::prefix('auth')->group(function () {
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');
 });
+
 
 
 Route::group(['middleware' => ['auth:api'], 'namespace' => 'Api'], function () {

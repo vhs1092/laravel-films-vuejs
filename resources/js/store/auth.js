@@ -32,7 +32,7 @@ const actions = {
 		window.localStorage.setItem('userId', data.user_id)
 		axios.defaults.headers.common['Authorization'] = 'Bearer ' + data.access_token
 
-		router.push({name: 'Dashboard'})
+		router.push({ name: 'Home'})
 	},
 
 	logout ({ commit }) {
@@ -41,7 +41,7 @@ const actions = {
 		window.localStorage.removeItem('userId')
 		delete axios.defaults.headers.common['Authorization']
 
-		router.push({name: 'Home'})
+		router.push({name: 'Login'})
 	}
 }
 

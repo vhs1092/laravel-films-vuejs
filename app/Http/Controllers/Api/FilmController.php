@@ -24,7 +24,7 @@ class FilmController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {  
         try {
             Log::info('- [Film] Listing data...');
             $films = Film::all();

@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\Request;
-
+use App\Http\Requests\RegisterRequest;
+use App\Models\User;
 class AuthController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login']]);
+        //$this->middleware('auth:api', ['except' => ['login']]);
     }
 
     /**
@@ -39,33 +40,28 @@ class AuthController extends Controller
 
     protected function respondWithToken($token)
     {
-        return response()->json(
-            [
-                'status'        => 'success',
-                'Authorization' => $token,
-                'token_type'    => 'bearer',
-                'expires_in'    => auth()->factory()->getTTL() * 60,
-            ]
-        );
+        return response()->json([
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth()->factory()->getTTL() * 60,
+            'user_id' => auth()->user()->id
+        ]);
+
     }
 
-    public function register(Request $request)
-    {
 
-        $user           = new User;
-        $user->email    = $request->email;
-        $user->name     = $request->name;
+ public function register(Request $request)
+    {   
+    
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->save();
-
-        return response(
-            [
-                'status' => 'success',
-                'data'   => $user,
-            ],
-            200
-        );
-    }
+ 
+        return $this->login($request);
+        
+       }
 
     /**
      * Log the user out (Invalidate the token)
@@ -75,7 +71,7 @@ class AuthController extends Controller
     public function logout()
     {
         auth()->logout();
-        return response()->json(['message' => 'Successfully logged out']);
+        return redirect('/login');
     }
 
     /**

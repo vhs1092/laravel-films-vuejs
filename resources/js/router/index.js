@@ -1,9 +1,10 @@
 import VueRouter from 'vue-router'
 import store from '../store'
-import Home from '../components/Home.vue'
+import Home from '../components/Dashboard.vue'
+import CreateFilm from '../components/films/form.vue'
+import indexFilm from '../components/films/index.vue'
 import Register from '../components/Register.vue'
 import Login from '../components/Login.vue'
-import Dashboard from '../components/Dashboard.vue'
 
 const router = new VueRouter({
 	mode: 'history',
@@ -13,7 +14,23 @@ const router = new VueRouter({
 			name: 'Home',
 			component: Home,
 			meta: {
-				auth: false
+				auth: true
+			}
+		},
+		{
+			path: '/films',
+			name: 'films',
+			component: indexFilm,
+			meta: {
+				auth: true
+			}
+		},
+		{
+			path: '/films/create',
+			name: 'Create Film',
+			component: CreateFilm,
+			meta: {
+				auth: true
 			}
 		},
 		{
@@ -30,14 +47,6 @@ const router = new VueRouter({
 			component: Login,
 			meta: {
 				auth: false
-			}
-		},
-		{
-			path: '/dashboard',
-			name: 'Dashboard',
-			component: Dashboard,
-			meta: {
-				auth: true
 			}
 		},
 		{
